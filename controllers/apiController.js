@@ -16,7 +16,7 @@ exports.getAllProducts = async (req, res) => {
   }
 };
 
-// GET /api/produk/:id (Read By ID) - Mengambil detail satu data berdasarkan ID
+
 exports.getProductById = async (req, res) => {
   try {
     const product = await Produk.findByPk(req.params.id);
@@ -31,7 +31,6 @@ exports.getProductById = async (req, res) => {
   }
 };
 
-// POST /api/produk (Create) - Menambahkan data baru ke dalam database
 exports.createProduct = async (req, res) => {
   try {
     const { name, category, price, status } = req.body;
