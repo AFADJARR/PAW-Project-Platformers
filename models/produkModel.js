@@ -1,37 +1,35 @@
-const products = [
-  {
-    id: 1,
-    category: "Mobil",
-    material: "Akrilik Standar",
-    price: 120000,
-    isAvailable: true,
-  },
-  {
-    id: 2,
-    category: "Mobil",
-    material: "Akrilik LED",
-    price: 250000,
-    isAvailable: true,
-  },
-  {
-    id: 3,
-    category: "Motor",
-    material: "Aluminium Standar",
-    price: 60000,
-    isAvailable: true,
-  },
-  {
-    id: 4,
-    category: "Motor",
-    material: "Aluminium Pantul (Reflector)",
-    price: 85000,
-    isAvailable: false,
-  },
-];
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/db");
 
-const Product = {
-  getAll: () => products,
-  getAvailable: () => products.filter((p) => p.isAvailable),
-};
+const Produk = sequelize.define(
+  "Produk",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    category: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    price: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.STRING,
+      defaultValue: "Tersedia",
+    },
+  },
+  {
+    tableName: "produk",
+    timestamps: false,
+  },
+);
 
-module.exports = Product;
+module.exports = Produk;
