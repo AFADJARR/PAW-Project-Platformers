@@ -1,14 +1,13 @@
-const Product = require("../models/produkModel");
-const config = require("../config/index");
+const Produk = require("../models/produkModel");
 
 const homeController = {
-  renderIndex: (req, res) => {
-    const products = Product.getAll();
-    res.render("index", {
-      title: `${config.appName} - Layanan Pemesanan Plat Custom`,
-      products: products,
-      author: config.author,
-    });
+  renderIndex: async (req, res) => {
+    try {
+      res.render("index");
+    } catch (err) {
+      console.error("Gagal memuat halaman utama:", err);
+      res.status(500).send("Terjadi kesalahan pada server.");
+    }
   },
 };
 

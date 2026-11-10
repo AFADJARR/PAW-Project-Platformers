@@ -29,12 +29,10 @@
   </aside>
 
   <main class="flex-1 flex flex-col min-h-screen">
-    
-
     <header class="bg-slate-900/50 backdrop-blur border-b border-slate-800 px-8 py-4 flex justify-between items-center">
       <div>
         <h1 class="text-xl font-bold">Dashboard Manajemen Produk</h1>
-        <p class="text-xs text-slate-400">Kelola katalog varian plat kendaraan secara real-time</p>
+        <p class="text-xs text-slate-400">Kelola katalog varian plat kendaraan secara real-time dari database</p>
       </div>
       <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-medium text-sm transition shadow-lg shadow-blue-600/20">
         + Tambah Produk
@@ -42,7 +40,6 @@
     </header>
 
     <div class="p-8 space-y-6 flex-1">
-      
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
           <p class="text-xs text-slate-400 font-medium">Total Produk</p>
@@ -62,17 +59,18 @@
 
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
         <div class="flex justify-between items-center mb-6">
-          <h3 class="font-bold text-base">Daftar Varian Plat</h3>
+          <h3 class="font-bold text-base">Daftar Varian Plat (Database)</h3>
           <a href="/api/products" target="_blank" class="text-xs text-blue-400 hover:underline">Lihat Data Mentah API &rarr;</a>
         </div>
 
         <div id="product-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Data produk dimuat secara dinamis via JavaScript -->
         </div>
       </div>
-
     </div>
   </main>
 
+  <!-- Modal Form CRUD -->
   <div id="crudModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center p-4 z-50">
     <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl w-full max-w-md text-white shadow-2xl">
       <h3 id="modalTitle" class="text-lg font-bold mb-4">Tambah Produk</h3>
@@ -109,13 +107,14 @@
     async function loadProducts() {
       try {
         const res = await fetch('/api/products');
-        const { data } = await res.json();
+        const result = await res.json();
+        const data = result.data;
         const container = document.getElementById('product-list');
         
         document.getElementById('statTotal').innerText = data.length;
 
         if (!data || data.length === 0) {
-          container.innerHTML = `<p class="text-slate-400 text-center col-span-2 py-8">Belum ada produk tersimpan.</p>`;
+          container.innerHTML = `<p class="text-slate-400 text-center col-span-2 py-8">Belum ada produk tersimpan di database.</p>`;
           return;
         }
 
@@ -127,7 +126,7 @@
               <p class="text-emerald-400 font-semibold text-sm mt-0.5">Rp ${Number(item.price).toLocaleString('id-ID')}</p>
             </div>
             <div class="flex items-center gap-1.5">
-              <button onclick="editProduct(${item.id}, '${item.name}', '${item.category}', ${item.price})" class="px-3 py-1.5 bg-amber-600/10 text-amber-400 hover:bg-amber-600/20 border border-amber-600/20 rounded-lg text-xs font-semibold transition">Edit</button>
+              <button onclick="editProduct(${item.id}, '${item.name.replace(/'/g, "\\'")}', '${item.category}', ${item.price})" class="px-3 py-1.5 bg-amber-600/10 text-amber-400 hover:bg-amber-600/20 border border-amber-600/20 rounded-lg text-xs font-semibold transition">Edit</button>
               <button onclick="deleteProduct(${item.id})" class="px-3 py-1.5 bg-red-600/10 text-red-400 hover:bg-red-600/20 border border-red-600/20 rounded-lg text-xs font-semibold transition">Hapus</button>
             </div>
           </div>
@@ -136,6 +135,7 @@
         console.error("Gagal memuat produk:", err);
       }
     }
+
     async function saveProduct(e) {
       e.preventDefault();
       const id = document.getElementById('prodId').value;
@@ -148,20 +148,28 @@
       const url = id ? `/api/products/${id}` : '/api/products';
       const method = id ? 'PUT' : 'POST';
 
-      await fetch(url, {
+      const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
 
-      closeModal();
-      loadProducts();
+      if (res.ok) {
+        closeModal();
+        loadProducts();
+      } else {
+        alert('Gagal menyimpan data produk.');
+      }
     }
 
     async function deleteProduct(id) {
-      if (confirm('Yakin ingin menghapus produk ini dari sistem?')) {
-        await fetch(`/api/products/${id}`, { method: 'DELETE' });
-        loadProducts();
+      if (confirm('Yakin ingin menghapus produk ini dari database?')) {
+        const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+          loadProducts();
+        } else {
+          alert('Gagal menghapus produk.');
+        }
       }
     }
 
@@ -184,6 +192,7 @@
     function closeModal() {
       document.getElementById('crudModal').classList.add('hidden');
     }
+
 
     loadProducts();
   </script>
